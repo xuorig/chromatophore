@@ -1,4 +1,4 @@
-package chromatophore
+package com.xuorig.chromatophore
 
 import java.time.Instant
 

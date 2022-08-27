@@ -1,0 +1,15 @@
+type Query {
+    shows: [Show]
+
+    _chromatophore: [ChromatophoreField!]!
+}
+
+type Show {
+    title: String
+    releaseYear: Int
+}
+
+type ChromatophoreField {
+    originalFieldName: String!
+    version: Int!
+}

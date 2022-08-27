@@ -1,10 +1,16 @@
-package chromatophore
+package com.xuorig.chromatophore
 
-class InMemoryPersitenceAdapter(): ChromophorePersistenceAdapter {
+class InMemoryStore(): ChromophoreStore {
     val store = mutableMapOf<String, Map<String, FieldVersionInfo>>()
 
     override fun persistClientIndex(clientId: String, index: Map<String, FieldVersionInfo>) {
-        store[clientId] = index
+        store.compute(clientId) { _, existingIndex ->
+            if (existingIndex == null) {
+                index
+            } else {
+                existingIndex + index
+            }
+        }
     }
 
     override fun getClientIndex(clientId: String): Map<String, FieldVersionInfo>? {

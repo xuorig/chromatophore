@@ -1,4 +1,4 @@
-package chromatophore
+package com.xuorig.chromatophore
 
 import graphql.schema.GraphQLObjectType
 import graphql.schema.idl.*
@@ -31,7 +31,7 @@ class SchemaVersionTransformerTest {
 
         val graphQLSchema = buildSchema(sdl, EchoingWiringFactory.newEchoingWiring())
 
-        val transformed = SchemaVersionTransformer(InMemoryPersitenceAdapter()).versionSchema(graphQLSchema, "client1")
+        val transformed = SchemaVersionTransformer(InMemoryStore()).versionSchema(graphQLSchema, "client1")
 
         val productType = transformed.getType("Product") as GraphQLObjectType
         val priceField = productType.getField("price")
@@ -74,7 +74,7 @@ class SchemaVersionTransformerTest {
 
         val graphQLSchema = buildSchema(sdl, EchoingWiringFactory.newEchoingWiring())
 
-        val adapter = InMemoryPersitenceAdapter()
+        val adapter = InMemoryStore()
         adapter.persistClientIndex("client1", mutableMapOf(
             "Product.price" to FieldVersionInfo(1, firstRequested = Instant.now())
         ))

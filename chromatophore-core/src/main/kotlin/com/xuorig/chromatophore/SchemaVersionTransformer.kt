@@ -1,8 +1,9 @@
-package chromatophore
+package com.xuorig.chromatophore
 
+import graphql.GraphQL
 import graphql.schema.*
 
-class SchemaVersionTransformer(private val persistenceAdapter: ChromophorePersistenceAdapter) {
+class SchemaVersionTransformer(private val persistenceAdapter: ChromophoreStore) {
     fun versionSchema(
         schema: GraphQLSchema,
         clientId: String,

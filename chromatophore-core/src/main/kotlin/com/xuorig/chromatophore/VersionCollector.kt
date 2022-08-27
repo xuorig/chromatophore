@@ -1,4 +1,4 @@
-package chromatophore
+package com.xuorig.chromatophore
 
 import graphql.ExecutionResult
 import graphql.GraphQLContext
@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture
  * The version collector records which version of the schema fields a client is using
  */
 class VersionCollector(
-    private val persistenceAdapter: ChromophorePersistenceAdapter,
+    private val persistenceAdapter: ChromophoreStore,
     private val clientIdFromContext: (ctx: GraphQLContext) -> String
 ) : SimpleInstrumentation() {
     override fun createState(parameters: InstrumentationCreateStateParameters): InstrumentationState {
@@ -37,6 +37,18 @@ class VersionCollector(
         }
     }
 
+    override fun beginField(
+        parameters: InstrumentationFieldParameters,
+    ): InstrumentationContext<ExecutionResult> {
+        return object: SimpleInstrumentationContext<ExecutionResult>() {
+            override fun onCompleted(result: ExecutionResult, t: Throwable?) {
+                val collector = parameters.getInstrumentationState<VersionCollectorState>()
+                val parentType = parameters.executionStepInfo.parent.type
+                collector.addField(parentType, parameters.field)
+            }
+        }
+    }
+
     override fun instrumentExecutionResult(
         executionResult: ExecutionResult,
         parameters: InstrumentationExecutionParameters,
@@ -44,6 +56,17 @@ class VersionCollector(
     ): CompletableFuture<ExecutionResult> {
         val result = super.instrumentExecutionResult(executionResult, parameters, state)
         val collector = state as VersionCollectorState
+        val clientId = clientIdFromContext(parameters.graphQLContext)
+        persistenceAdapter.persistClientIndex(clientId, collector.index)
+        return result
+    }
+
+    override fun instrumentExecutionResult(
+        executionResult: ExecutionResult,
+        parameters: InstrumentationExecutionParameters,
+    ): CompletableFuture<ExecutionResult> {
+        val collector = parameters.getInstrumentationState<VersionCollectorState>()
+        val result = super.instrumentExecutionResult(executionResult, parameters)
         val clientId = clientIdFromContext(parameters.graphQLContext)
         persistenceAdapter.persistClientIndex(clientId, collector.index)
         return result
@@ -63,7 +86,7 @@ class VersionCollectorState : InstrumentationState {
         val fieldKey = "${namedType.name}.${field.name}"
 
         val version = if (directive != null) {
-            directive.getArgument("version").getValue<Int>()
+            directive.getArgument("version").getValue()
         } else {
             0
         }

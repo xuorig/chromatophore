@@ -1,4 +1,4 @@
-package chromatophore
+package com.xuorig.chromatophore
 
 import graphql.Scalars
 import graphql.language.IntValue

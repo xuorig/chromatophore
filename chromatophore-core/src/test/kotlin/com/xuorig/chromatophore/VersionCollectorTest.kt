@@ -1,7 +1,6 @@
-package chromatophore
+package com.xuorig.chromatophore
 
 import graphql.ExecutionInput
-import graphql.ExecutionResult
 import graphql.GraphQL
 import graphql.schema.idl.*
 import kotlin.test.Test
@@ -31,7 +30,7 @@ class VersionCollectorTest {
         """.trimIndent()
 
         val graphQLSchema = buildSchema(sdl, EchoingWiringFactory.newEchoingWiring())
-        val mmrAdapter = InMemoryPersitenceAdapter()
+        val mmrAdapter = InMemoryStore()
         val versionCollector = VersionCollector(mmrAdapter) {
             it["chromatophore.clientId"]
         }
@@ -74,7 +73,7 @@ class VersionCollectorTest {
 
         val graphQLSchema = buildSchema(sdl, EchoingWiringFactory.newEchoingWiring())
 
-        val mmrAdapter = InMemoryPersitenceAdapter()
+        val mmrAdapter = InMemoryStore()
         val versionCollector = VersionCollector(mmrAdapter) {
             it["chromatophore.clientId"]
         }
