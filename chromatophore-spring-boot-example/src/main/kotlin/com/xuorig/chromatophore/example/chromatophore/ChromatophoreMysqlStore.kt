@@ -2,7 +2,6 @@ package com.xuorig.chromatophore.example.chromatophore
 
 import com.xuorig.chromatophore.ChromatophoreStore
 import com.xuorig.chromatophore.FieldVersionInfo
-import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
 import java.time.Instant
 

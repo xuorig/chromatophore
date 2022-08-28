@@ -3,7 +3,7 @@ package com.xuorig.chromatophore.example.chromatophore
 import javax.persistence.*
 
 @Entity
-@Table(name = "field_transforms", indexes = [Index(name = "fieldNameUniqueIndex", columnList = "fieldName", unique = true)])
+@Table(name = "field_transforms", indexes = [Index(name = "fieldNameUniqueIndex", columnList = "fieldName,client_id", unique = true)])
 class ChromatophoreFieldTransform(
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)

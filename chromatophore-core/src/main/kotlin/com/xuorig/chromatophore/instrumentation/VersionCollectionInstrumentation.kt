@@ -70,7 +70,7 @@ class VersionCollectorState : InstrumentationState {
         val fieldKey = "${namedType.name}.${field.name}"
 
         val version = if (directive != null) {
-            directive.getArgument("version").getValue()
+            directive.getArgument("number").getValue()
         } else {
             0
         }

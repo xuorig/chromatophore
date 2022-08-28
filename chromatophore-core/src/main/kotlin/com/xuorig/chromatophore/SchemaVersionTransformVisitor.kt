@@ -28,11 +28,13 @@ class SchemaVersionTransformVisitor(private val clientIndex: ClientVersionIndex)
             }
         }
 
-        // First, remove all fields that are going to be replaced, or are replacing fields
-        val willReplaceNames = supersedingFields.values.flatMap { it.map { it.fieldDefinition.name } }
-        val filteredFields = node.fields.filter { it.name !in supersedingFields && it.name !in willReplaceNames }
+        // Add the original field def as well for version 0
+        supersedingFields.keys.forEach { fieldName ->
+            val fieldDef = node.getField(fieldName)
+            supersedingFields[fieldName]!!.add(SupersedingField(fieldDef, 0))
+        }
 
-        // Then we build the new fields matching for the right requested version.
+        // First we build the new fields matching for the right requested version.
         // When there is no requested version, we take the most recent version.
         val newFields = supersedingFields.map { (replacedName, potentialFields) ->
             val fieldKey = "${node.name}.${replacedName}"
@@ -48,6 +50,11 @@ class SchemaVersionTransformVisitor(private val clientIndex: ClientVersionIndex)
                 it.name(replacedName).withAppliedDirective(versionDirective(matchingField.version))
             }
         }.filterNotNull()
+
+
+        // Then, remove all fields that are going to be replaced, or are replacing fields
+        val willReplaceNames = supersedingFields.values.flatMap { it.map { it.fieldDefinition.name } }
+        val filteredFields = node.fields.filter { it.name !in supersedingFields && it.name !in willReplaceNames }
 
         return changeNode(context, node.transform { it.replaceFields(filteredFields + newFields) })
     }

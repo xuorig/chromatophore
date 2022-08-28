@@ -1,12 +1,19 @@
+directive @supersedesField(field: String!, version: Int!) on FIELD_DEFINITION
+
 type Query {
     shows: [Show]
-
-    _chromatophore: [ChromatophoreField!]!
 }
 
 type Show {
     title: String
     releaseYear: Int
+
+    titleV2: ShowTitle @supersedesField(field: "title", version: 1)
+}
+
+type ShowTitle {
+    name: String
+    substitle: String
 }
 
 type ChromatophoreField {
