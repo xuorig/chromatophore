@@ -1,5 +1,8 @@
-package com.xuorig.chromatophore
+package com.xuorig.chromatophore.instrumentation
 
+import com.xuorig.chromatophore.CHROMATOPHORE_VERSION_DIRECTIVE
+import com.xuorig.chromatophore.ChromatophoreStore
+import com.xuorig.chromatophore.FieldVersionInfo
 import graphql.ExecutionResult
 import graphql.GraphQLContext
 import graphql.execution.instrumentation.InstrumentationContext
@@ -9,32 +12,23 @@ import graphql.execution.instrumentation.SimpleInstrumentationContext
 import graphql.execution.instrumentation.parameters.InstrumentationCreateStateParameters
 import graphql.execution.instrumentation.parameters.InstrumentationExecutionParameters
 import graphql.execution.instrumentation.parameters.InstrumentationFieldParameters
-import graphql.schema.*
+import graphql.schema.GraphQLAppliedDirective
+import graphql.schema.GraphQLFieldDefinition
+import graphql.schema.GraphQLNamedOutputType
+import graphql.schema.GraphQLOutputType
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
 
 /**
- * The version collector records which version of the schema fields a client is using
+ * The version collector is a graphql-java [SimpleInstrumentation]
+ * that records which version of the schema fields a client is using.
  */
-class VersionCollector(
-    private val persistenceAdapter: ChromophoreStore,
-    private val clientIdFromContext: (ctx: GraphQLContext) -> String
+class VersionCollectionInstrumentation(
+    private val persistenceAdapter: ChromatophoreStore,
+    private val clientIdFromContext: ClientIdContextExtractor
 ) : SimpleInstrumentation() {
     override fun createState(parameters: InstrumentationCreateStateParameters): InstrumentationState {
         return VersionCollectorState()
-    }
-
-    override fun beginField(
-        parameters: InstrumentationFieldParameters,
-        state: InstrumentationState
-    ): InstrumentationContext<ExecutionResult> {
-        return object: SimpleInstrumentationContext<ExecutionResult>() {
-            override fun onCompleted(result: ExecutionResult, t: Throwable?) {
-                val collector = state as VersionCollectorState
-                val parentType = parameters.executionStepInfo.parent.type
-                collector.addField(parentType, parameters.field)
-            }
-        }
     }
 
     override fun beginField(
@@ -52,23 +46,13 @@ class VersionCollector(
     override fun instrumentExecutionResult(
         executionResult: ExecutionResult,
         parameters: InstrumentationExecutionParameters,
-        state: InstrumentationState
-    ): CompletableFuture<ExecutionResult> {
-        val result = super.instrumentExecutionResult(executionResult, parameters, state)
-        val collector = state as VersionCollectorState
-        val clientId = clientIdFromContext(parameters.graphQLContext)
-        persistenceAdapter.persistClientIndex(clientId, collector.index)
-        return result
-    }
-
-    override fun instrumentExecutionResult(
-        executionResult: ExecutionResult,
-        parameters: InstrumentationExecutionParameters,
     ): CompletableFuture<ExecutionResult> {
         val collector = parameters.getInstrumentationState<VersionCollectorState>()
         val result = super.instrumentExecutionResult(executionResult, parameters)
-        val clientId = clientIdFromContext(parameters.graphQLContext)
+
+        val clientId = clientIdFromContext.extract(parameters.graphQLContext) ?: return result
         persistenceAdapter.persistClientIndex(clientId, collector.index)
+
         return result
     }
 }

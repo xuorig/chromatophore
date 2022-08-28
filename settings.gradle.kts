@@ -10,4 +10,6 @@
 
 rootProject.name = "chromatophore"
 include("chromatophore-core")
-include("chromatophore-dgs-example")
+include("chromatophore-spring-boot-example")
+include("chromatophore-spring-boot-autoconfigure")
+include("chromatophore-spring-boot-starter")

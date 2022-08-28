@@ -5,6 +5,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.0.13.RELEASE"
 	kotlin("jvm") version "1.6.21"
 	kotlin("plugin.spring") version "1.6.21"
+	id("org.jetbrains.kotlin.plugin.noarg") version "1.6.21"
 }
 
 group = "com.xuorig.chromatophore"
@@ -15,9 +16,15 @@ repositories {
 	mavenCentral()
 }
 
+noArg {
+	annotation("javax.persistence.Entity")
+}
+
 dependencies {
-	implementation(project(":chromatophore-core"))
+	implementation(project(":chromatophore-spring-boot-starter"))
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("mysql:mysql-connector-java")
 	implementation("org.springframework.boot:spring-boot-starter-graphql")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework:spring-webflux")

@@ -27,7 +27,7 @@ dependencies {
     // Use the Kotlin JDK 8 standard library.
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-    implementation("com.graphql-java:graphql-java:19.1")
+    implementation("com.graphql-java:graphql-java:18.3")
 }
 
 testing {

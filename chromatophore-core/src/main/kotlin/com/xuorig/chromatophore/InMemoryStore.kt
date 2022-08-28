@@ -1,6 +1,6 @@
 package com.xuorig.chromatophore
 
-class InMemoryStore(): ChromophoreStore {
+class InMemoryStore(): ChromatophoreStore {
     val store = mutableMapOf<String, Map<String, FieldVersionInfo>>()
 
     override fun persistClientIndex(clientId: String, index: Map<String, FieldVersionInfo>) {

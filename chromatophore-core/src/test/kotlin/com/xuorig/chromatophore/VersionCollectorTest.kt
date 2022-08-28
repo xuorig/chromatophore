@@ -1,5 +1,6 @@
 package com.xuorig.chromatophore
 
+import com.xuorig.chromatophore.instrumentation.VersionCollectionInstrumentation
 import graphql.ExecutionInput
 import graphql.GraphQL
 import graphql.schema.idl.*
@@ -31,7 +32,7 @@ class VersionCollectorTest {
 
         val graphQLSchema = buildSchema(sdl, EchoingWiringFactory.newEchoingWiring())
         val mmrAdapter = InMemoryStore()
-        val versionCollector = VersionCollector(mmrAdapter) {
+        val versionCollector = VersionCollectionInstrumentation(mmrAdapter) {
             it["chromatophore.clientId"]
         }
         val build = GraphQL.newGraphQL(graphQLSchema).instrumentation(versionCollector).build()
@@ -74,13 +75,14 @@ class VersionCollectorTest {
         val graphQLSchema = buildSchema(sdl, EchoingWiringFactory.newEchoingWiring())
 
         val mmrAdapter = InMemoryStore()
-        val versionCollector = VersionCollector(mmrAdapter) {
+        val versionCollector = VersionCollectionInstrumentation(mmrAdapter) {
             it["chromatophore.clientId"]
         }
         val build = GraphQL.newGraphQL(graphQLSchema).instrumentation(versionCollector).build()
 
         val query = "{ product { name price description image(size: 4) { size alt url } } }"
         val executionInput = ExecutionInput.newExecutionInput().query(query).graphQLContext(mapOf("chromatophore.clientId" to "client1"))
+        build.execute(executionInput.build())
 
         val clientIndex = mmrAdapter.store["client1"]
         assertNotNull(clientIndex, "No client index was created for client1")
